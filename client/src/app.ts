@@ -1,36 +1,9 @@
 import ExposureSiteInfo from "@backend/Types/ExposureSiteInterface"
 import keys from './keys'
 
-const script = document.createElement("script");
-script.src = `https://maps.googleapis.com/maps/api/js?key=${keys}&callback=initMap&libraries=&v=weekly`;
-script.async = true;
-document.body.appendChild(script);
+const SITE_PATH = '../../sites.json';
 
-// Initialize and add the map
-function initMap(): void {
-  const melbourne = { lat: -37.8136, lng: 144.9631 };
-  const map = new google.maps.Map(
-    document.getElementById("map") as HTMLElement,
-    {
-      zoom: 4,
-      center: melbourne,
-    }
-  );
-}
-
-function loadJSON(callback: any) {
-  var xobj = new XMLHttpRequest();
-  xobj.overrideMimeType("application/json");
-  xobj.open('GET', '../../student-2.json', true);
-  xobj.onreadystatechange = function () {
-    if (xobj.readyState === 4 && xobj.status === 200) {
-      callback(JSON.parse(xobj.responseText));
-    }
-  };
-  xobj.send(null);
-}
-
-loadJSON((json: [ExposureSiteInfo]): void => {
+const addMarkers = (json: [ExposureSiteInfo]): void => {
   const melbourne = { lat: -37.8136, lng: 144.9631 };
   // The map, centered at Uluru
   const map = new google.maps.Map(
@@ -76,6 +49,38 @@ loadJSON((json: [ExposureSiteInfo]): void => {
       });
     });
   }
+}
+
+// Initialize and add the map
+const initMap = (): void => {
+  const melbourne = { lat: -37.8136, lng: 144.9631 };
+  new google.maps.Map(
+    document.getElementById("map") as HTMLElement,
+    {
+      zoom: 4,
+      center: melbourne,
+    }
+  );
+}
+
+const loadJSON = (path: string, callback: any) => {
+  var xobj = new XMLHttpRequest();
+  xobj.overrideMimeType("application/json");
+  xobj.open('GET', path, true);
+  xobj.onreadystatechange = function () {
+    if (xobj.readyState === 4 && xobj.status === 200) {
+      callback(JSON.parse(xobj.responseText));
+    }
+  };
+  xobj.send(null);
+}
+
+const script = document.createElement("script");
+script.src = `https://maps.googleapis.com/maps/api/js?key=${keys}&callback=initMap&libraries=&v=weekly`;
+script.async = true;
+document.body.appendChild(script);
+script.addEventListener("load", () => {
+  loadJSON(SITE_PATH, addMarkers);
 });
 
 
