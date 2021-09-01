@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-chrome",
+            "request": "launch",
+            "name": "Launch Chrome against localhost",
+            "url": "http://localhost:8080/dist/",
+            "webRoot": "${workspaceFolder}",
+            "runtimeArgs": [
+                // Allow CORS locally
+                "--disable-web-security",
+                // Required with --disable-web-security
+                "--user-data-dir=/tmp/chrome-dev/"
+            ],
+        },
+        {
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/server/src/out/server.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
+        }
+    ]
+}

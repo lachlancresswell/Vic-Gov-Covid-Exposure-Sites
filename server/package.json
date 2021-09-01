@@ -1,0 +1,27 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "tsc && node ./src/out/server.js",
+    "watch": "tsc -w"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.12",
+    "@types/papaparse": "^5.2.6",
+    "@types/request": "^2.48.7",
+    "typescript": "^4.4.2"
+  },
+  "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.1.16",
+    "dotenv": "^10.0.0",
+    "node-fetch": "^2.6.1",
+    "papaparse": "^5.3.1",
+    "request": "^2.88.2"
+  }
+}
