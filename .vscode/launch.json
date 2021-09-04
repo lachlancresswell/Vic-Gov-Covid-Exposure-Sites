@@ -15,9 +15,22 @@
             ],
         },
         {
-            "name": "Launch Program",
+            "name": "Debug Server",
             "program": "${workspaceFolder}/server/src/out/server.js",
             "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
+        },
+        {
+            "name": "Debug Server via NPM",
+            "request": "launch",
+            "runtimeArgs": [
+                "run-script",
+                "debug"
+            ],
+            "runtimeExecutable": "npm",
             "skipFiles": [
                 "<node_internals>/**"
             ],

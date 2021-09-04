@@ -63,7 +63,7 @@ const getGeocodeLatLong = (address: string): Promise<{ longitude: number, latitu
  */
 const parseSiteCsv = async (siteCsvData: [ExposureSiteInfo]): Promise<any> => {
   const processed = [];
-  for (let i = 0; i < 3; i += 1) {
+  for (let i = 0; process.env.SITE_LIMIT && i < parseInt(process.env.SITE_LIMIT); i += 1) {
     const address = encodeURI(`${siteCsvData[i].Site_streetaddress.replace(' ', '+')}+${siteCsvData[i].Suburb}+${siteCsvData[i].Site_state}`);
 
     const latLong = await getGeocodeLatLong(address);
