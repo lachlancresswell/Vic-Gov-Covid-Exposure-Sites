@@ -24,17 +24,18 @@
             "type": "pwa-node"
         },
         {
-            "name": "Debug Server via NPM",
+            "name": "Debug Server Tests",
             "request": "launch",
             "runtimeArgs": [
-                "run-script",
-                "debug"
+                "jest"
             ],
-            "runtimeExecutable": "npm",
+            "runtimeExecutable": "npx",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "type": "pwa-node"
+            "type": "pwa-node",
+            "cwd": "${workspaceFolder}/server/",
+            "sourceMaps": true
         }
     ]
 }

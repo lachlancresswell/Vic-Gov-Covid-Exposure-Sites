@@ -1,10 +1,10 @@
 import * as Papa from 'papaparse';
 import * as fs from 'fs';
 import * as dotenv from 'dotenv';
-import ExposureSiteInfo from './Types/ExposureSiteInterface';
+import { ExposureSiteInfo, VicDataSiteInfo } from './Types/ExposureSiteInterface';
 import GeocodeInterface from './Types/GeocodeInterface';
-import VicDataInterface from './Types/VicDataInterface'
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { VicDataResponse } from './Types/VicDataInterface'
+import axios from 'axios';
 
 const envConfig = dotenv.config({ path: `${__dirname}/../../../.env` });
 if (envConfig.error) {
@@ -20,61 +20,69 @@ const DATA_VIC_HEADER = {
   apikey: process.env.DATA_VIC_API_KEY as string,
 };
 
-/**
- * Get lat + long from a given address
- * @param address Address string to find lat + long of
- * @returns Object containing lat + long
- */
-const getGeocodeLatLong = (address: string): Promise<{ lng: number, lat: number } | Error> => new Promise(async (resolve, reject) => {
-  const options: AxiosRequestConfig = {
-    baseURL: 'https://maps.googleapis.com',
-    url: `/maps/api/geocode/json?address=${address}&key=${process.env.GOOGLE_API_KEY}`,
-    method: 'GET',
-  };
-
-  const req: { data: GeocodeInterface } = await axios(options)
-
-  resolve({
-    lat: req.data.results[0].geometry.viewport.northeast.lat,
-    lng: req.data.results[0].geometry.viewport.northeast.lng,
-  });
-});
 
 /**
  * Adds lat + long data to existing site info + saves to disk
  * @param siteCsvData JSON site info
  */
-const parseSiteCsv = async (siteCsvData: [ExposureSiteInfo]): Promise<any> => {
-  const processed = [];
-  for (let i = 0; process.env.SITE_LIMIT && i < parseInt(process.env.SITE_LIMIT); i += 1) {
+export const parseSiteCsv = (siteCsvData: [VicDataSiteInfo]): Promise<ExposureSiteInfo[]> => new Promise(async (resolve, reject) => {
+
+  let processed: ExposureSiteInfo[] = [];
+  for (let i = 0; process.env.SITE_LIMIT && i < Math.min(parseInt(process.env.SITE_LIMIT), siteCsvData.length); i += 1) {
     const address = encodeURI(`${siteCsvData[i].Site_streetaddress.replace(' ', '+')}+${siteCsvData[i].Suburb}+${siteCsvData[i].Site_state}`);
 
-    const latLong = await getGeocodeLatLong(address);
-    if (!(latLong instanceof Error)) {
-      siteCsvData[i].latitude = latLong.lat;
-      siteCsvData[i].longitude = latLong.lng;
-      processed.push(siteCsvData[i]);
-    } else {
-      throw (latLong);
+    let latLng: { lat: number, lng: number };
+    try {
+
+      const req: { data: GeocodeInterface } = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${process.env.GOOGLE_API_KEY}`)
+      latLng = req.data.results[0].geometry.viewport.northeast;
+
+      processed.push(siteCsvData[i] as ExposureSiteInfo);
+      processed[processed.length - 1].latitude = latLng.lat;
+      processed[processed.length - 1].longitude = latLng.lng;
+
+    } catch {
+      console.log("Failed to geocode " + address)
     }
   }
 
-  const dataJson = JSON.stringify(processed);
-  fs.writeFileSync('./client/sites.json', dataJson);
-};
+  resolve(processed);
+})
+
 
 // Fetch exposure site .csv url from api.vic.gov.au and then fetch actual file
-axios.get(DATA_VIC_URL, { headers: DATA_VIC_HEADER }).then(async (response: { data: VicDataInterface }) => {
-  const vicDataResponse = response.data
-  const csvUrl = vicDataResponse._embedded.resources[0]._links[1].href;
+export const fetchSiteInfo = (path: string = './sites.json'): Promise<{ status: number, path: string } | Error> => new Promise(async (resolve, reject) => {
+
+  let csvUrl: string;
+  try {
+
+    const response: { data: VicDataResponse } = await axios.get(DATA_VIC_URL, { headers: DATA_VIC_HEADER });
+    const vicDataResponse = response.data
+    csvUrl = vicDataResponse._embedded.resources[0]._links[1].href;
+  } catch (err) {
+    return reject(new Error('Could not get site csv - ' + err))
+  }
   const parseStream = Papa.parse(Papa.NODE_STREAM_INPUT, { header: true });
 
-  const csvRequest = await axios
-    .get(csvUrl, { responseType: 'stream' })
+  try {
+    const csvRequest = await axios.get(csvUrl, { responseType: 'stream' })
+    csvRequest.data.pipe(parseStream);
+  } catch (err) {
+    reject('Could not retrieve initial site data - ' + err)
+  }
 
-  csvRequest.data.pipe(parseStream);
 
   const csvData: any = [];
   parseStream.on('data', (d) => csvData.push(d));
-  parseStream.on('finish', () => parseSiteCsv(csvData));
-});
+  parseStream.on('finish', async () => {
+    const siteInfo = await parseSiteCsv(csvData)
+    if (siteInfo.length) {
+      fs.writeFileSync(path, JSON.stringify(siteInfo));
+      resolve({ status: 1, path })
+    }
+    else reject(new Error('Could not geocode any sites.'));
+  });
+
+})
+
+fetchSiteInfo();
