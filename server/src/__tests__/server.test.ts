@@ -6,8 +6,9 @@ import { ExposureSiteInfo, VicDataSiteInfo, mockExposureSiteInfo, mockVicDataSit
 
 const PASS_LAT = 1.0;
 const PASS_LNG = 1.0;
-
 const FILE_PATH = './test-sites.json';
+
+jest.setTimeout(10000);
 
 describe('parseSiteCsv', () => {
 
