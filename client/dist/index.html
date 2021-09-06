@@ -4,38 +4,27 @@
 <head>
     <title>Add Map</title>
 
-    <style type="text/css">
-        /* Set the size of the div element that contains the map */
-        #map {
-            height: 400px;
-            /* The height is 400 pixels */
-            width: 100%;
-            /* The width is the width of the web page */
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <h3>My Google Maps Demo</h3>
-    <div id="controls">
-        <div id="textControls">
-            <div id="startDateControl">
-                <label for="startDate">Start date:</label><br>
-                <input type="date" id="startDate" min="2021-07-01" value="2021-09-05" max="2021-12-31">
-            </div>
-            <div id="endDateControl">
-                <label for="endDate">End date:</label><br>
-                <input type="date" id="endDate" min="2021-07-01" value="2021-09-06" max="2021-12-31">
+    <div class="inner">
+        <h3>Vic COVID-19 Exposure Site Demo</h3>
+        <div id="controls">
+            <div id="textControls">
+                <div id="startDateControl">
+                    <label for="startDate">Start date:</label><br>
+                    <input type="date" id="startDate" min="2021-07-01" value="2021-09-05" max="2021-12-31">
+                </div>
+                <div id="endDateControl">
+                    <label for="endDate">End date:</label><br>
+                    <input type="date" id="endDate" min="2021-07-01" value="2021-09-06" max="2021-12-31">
+                </div>
             </div>
         </div>
-        <div class="slidecontainer">
-            <label for="distanceRange">Distance:</label><br>
-            <input type="range" min="1" max="50" value="10" class="slider" id="distanceRange">
-        </div>
+        <!--The div element for the map -->
+        <div id="map"></div>
     </div>
-    <!--The div element for the map -->
-    <div id="map"></div>
-
     <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
 
     <script src="bundle.js"></script>
