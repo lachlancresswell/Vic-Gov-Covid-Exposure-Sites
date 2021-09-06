@@ -75,6 +75,8 @@ const loadJSON = (path: string, callback: any) => {
   xobj.onreadystatechange = function () {
     if (xobj.readyState === 4 && xobj.status === 200) {
       siteJson = JSON.parse(xobj.responseText);
+      modDateElement.textContent = xobj.getResponseHeader('Last-Modified');
+      siteCountElement.textContent = '' + siteJson.length
       callback(JSON.parse(xobj.responseText));
     }
   };
@@ -103,6 +105,8 @@ script.src = `https://maps.googleapis.com/maps/api/js?key=${keys}&callback=initM
 script.async = true;
 document.body.appendChild(script);
 
+const modDateElement = (document.getElementById('last-update') as HTMLInputElement);
+const siteCountElement = (document.getElementById('site-count') as HTMLInputElement);
 const startDateElement = (document.getElementById('startDate') as HTMLInputElement);
 const endDateElement = (document.getElementById('endDate') as HTMLInputElement);
 

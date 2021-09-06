@@ -6,6 +6,7 @@
 
 body {
     width: 100%;
+    font-family: monospace;
 }
 
 .inner {
@@ -14,7 +15,7 @@ body {
     margin: 0 auto;
 }
 
-h3 {
+h3, #stats {
     text-align: center;
 }
 
@@ -22,4 +23,10 @@ h3 {
     max-width: 10em;
     text-align: center;
     margin: 0.5em auto;
+}
+
+footer {
+    margin: 1em auto;
+    width: 90%;
+    text-align: center;
 }

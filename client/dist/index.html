@@ -10,6 +10,14 @@
 <body>
     <div class="inner">
         <h3>Vic COVID-19 Exposure Site Demo</h3>
+        <div id="stats">
+            <div>
+                Last updated: <span id="last-update">DATE</span>
+            </div>
+            <div>
+                <span id="site-count">NUM</span> sites
+            </div>
+        </div>
         <div id="controls">
             <div id="textControls">
                 <div id="startDateControl">
@@ -25,6 +33,9 @@
         <!--The div element for the map -->
         <div id="map"></div>
     </div>
+    <footer>
+        Date retrieved from data.vic.gov.au, geocoded and cached, and then plotted via Google Maps.
+    </footer>
     <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
 
     <script src="bundle.js"></script>
