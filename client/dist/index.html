@@ -21,11 +21,11 @@
         <div id="textControls">
             <div id="startDateControl">
                 <label for="startDate">Start date:</label><br>
-                <input type="date" id="startDate" min="2021-07-01">
+                <input type="date" id="startDate" min="2021-07-01" value="2021-09-05" max="2021-12-31">
             </div>
             <div id="endDateControl">
                 <label for="endDate">End date:</label><br>
-                <input type="date" id="endDate" min="2021-07-01">
+                <input type="date" id="endDate" min="2021-07-01" value="2021-09-06" max="2021-12-31">
             </div>
         </div>
         <div class="slidecontainer">
@@ -39,15 +39,6 @@
     <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
 
     <script src="bundle.js"></script>
-    <script>
-        var d = new Date();
-        date = d.getFullYear() + "-" + ("0" + d.getMonth()).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
-        console.log(date)
-        document.getElementById('startDate').max = date;
-        document.getElementById('startDate').value = date;
-        document.getElementById('endDate').max = date;
-        document.getElementById('endDate').value = date;
-    </script>
 
 </body>
 
