@@ -2,17 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-chrome",
+            "type": "firefox",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
+            "reAttach": true,
+            "name": "Firefox @ Localhost",
             "url": "http://localhost:8080/dist/",
-            "webRoot": "${workspaceFolder}",
-            "runtimeArgs": [
-                // Allow CORS locally
-                "--disable-web-security",
-                // Required with --disable-web-security
-                "--user-data-dir=/tmp/chrome-dev/"
-            ],
+            "webRoot": "${workspaceFolder}/client",
+            "pathMappings": [
+                {
+                    "url": "webpack:///src",
+                    "path": "${workspaceFolder}/client/src"
+                },
+            ]
         },
         {
             "name": "Debug Server",
