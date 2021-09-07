@@ -8,15 +8,22 @@ const PASS_LAT = 1.0;
 const PASS_LNG = 1.0;
 const FILE_PATH = './test-sites.json';
 
-jest.setTimeout(10000);
+jest.setTimeout(8000);
 
 describe('parseSiteCsv', () => {
 
-  let mockedAxios: jest.Mocked<typeof axios>;
   let mockAxiosGet: jest.SpyInstance<Promise<unknown>>;
+
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation();
+  })
 
   afterAll(() => {
     mockAxiosGet.mockRestore();
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks();
   })
 
   it('Succesfully geocodes', async () => {
@@ -28,12 +35,16 @@ describe('parseSiteCsv', () => {
       config: {},
     };
 
-    mockAxiosGet = jest.spyOn(axios, 'get').mockResolvedValueOnce(mockedResponse);
+    mockAxiosGet = jest.spyOn(axios, 'get').mockImplementation((url: string, config?: AxiosRequestConfig | undefined): Promise<any> => new Promise((resolve, reject) => {
+      resolve(mockedResponse)
+    }))
 
     expect(axios.get).not.toHaveBeenCalled();
-    const data = await Server.parseSiteCsv([mockVicDataSiteInfo()]);
+    expect(console.warn).not.toHaveBeenCalled();
+    const data = await Server.parseSiteCsv(mockVicDataSiteInfo());
     expect(axios.get).toHaveBeenCalled();
-    expect(data.length).toBe(1);
+    expect(console.warn).not.toHaveBeenCalled();
+    expect(data.length).toBe(mockVicDataSiteInfo().length);
     expect(data[0].latitude).toBe(PASS_LAT)
     expect(data[0].longitude).toBe(PASS_LNG)
 
@@ -43,11 +54,12 @@ describe('parseSiteCsv', () => {
     const errorMessage = 'Network Error';
 
 
-    mockAxiosGet = jest.spyOn(axios, 'get').mockImplementationOnce((url: string, config?: AxiosRequestConfig | undefined) => {
+    mockAxiosGet = jest.spyOn(axios, 'get').mockImplementation((url: string, config?: AxiosRequestConfig | undefined) => {
       throw new Error(errorMessage)
     })
 
-    const data = await Server.parseSiteCsv([mockVicDataSiteInfo()]);
+    const data = await Server.parseSiteCsv(mockVicDataSiteInfo());
+    expect(console.warn).toHaveBeenCalledTimes(mockVicDataSiteInfo().length)
     expect(data.length).toBe(0);
   });
 });
@@ -57,8 +69,8 @@ describe('fetchSiteInfo', () => {
   let mockParseSiteCsv: jest.SpyInstance<Promise<ExposureSiteInfo[]>>;
 
   beforeAll(() => {
-    mockParseSiteCsv = jest.spyOn(Server, 'parseSiteCsv').mockImplementation((siteCsvData: [VicDataSiteInfo]): Promise<ExposureSiteInfo[]> => new Promise(async (resolve) => {
-      resolve([mockExposureSiteInfo()]);
+    mockParseSiteCsv = jest.spyOn(Server, 'parseSiteCsv').mockImplementation((siteCsvData: VicDataSiteInfo[]): Promise<ExposureSiteInfo[]> => new Promise(async (resolve) => {
+      resolve(mockExposureSiteInfo());
     }))
   })
 

@@ -25,24 +25,30 @@ const DATA_VIC_HEADER = {
  * Adds lat + long data to existing site info + saves to disk
  * @param siteCsvData JSON site info
  */
-export const parseSiteCsv = (siteCsvData: [VicDataSiteInfo]): Promise<ExposureSiteInfo[]> => new Promise(async (resolve, reject) => {
+export const parseSiteCsv = (siteCsvData: VicDataSiteInfo[]): Promise<ExposureSiteInfo[]> => new Promise(async (resolve, reject) => {
 
   let processed: ExposureSiteInfo[] = [];
-  for (let i = 0; process.env.SITE_LIMIT && i < Math.min(parseInt(process.env.SITE_LIMIT), siteCsvData.length); i += 1) {
-    const address = encodeURI(`${siteCsvData[i].Site_streetaddress.replace(' ', '+')}+${siteCsvData[i].Suburb}+${siteCsvData[i].Site_state}`);
+  let limit = 1;
+  if (process.env.SITE_LIMIT) limit = Math.min(parseInt(process.env.SITE_LIMIT), siteCsvData.length);
+  for (let i = 0; i < limit; i += 1) {
+    const address = encodeURI(`${siteCsvData[i].Site_streetaddress.replace(new RegExp(' ', 'g'), '+')}+${siteCsvData[i].Suburb}+${siteCsvData[i].Site_state}`);
 
     let latLng: { lat: number, lng: number };
     try {
-
-      const req: { data: GeocodeInterface } = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${process.env.GOOGLE_API_KEY}`)
+      const req: { data: GeocodeInterface | { error_message: string } } = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${process.env.GOOGLE_API_KEY}`)
+      if ("error_message" in req.data) throw new Error(req.data.error_message)
       latLng = req.data.results[0].geometry.viewport.northeast;
 
       processed.push(siteCsvData[i] as ExposureSiteInfo);
       processed[processed.length - 1].latitude = latLng.lat;
       processed[processed.length - 1].longitude = latLng.lng;
 
-    } catch {
-      console.log("Failed to geocode " + address)
+      if (processed.length % 50 === 0) console.log(`Completed ${processed.length} of ${limit}`);
+      // 20ms delay to avoid the 50 requests/sec limit
+      await (new Promise((r) => setTimeout(r, 20)))
+
+    } catch (err: any) {
+      console.warn("Failed to geocode " + address + " - " + err.message)
     }
   }
 
@@ -85,4 +91,4 @@ export const fetchSiteInfo = (path: string = './sites.json'): Promise<{ status: 
 
 })
 
-fetchSiteInfo();
+if (!process.env.LOCATION || process.env.LOCATION !== "dev") fetchSiteInfo();
